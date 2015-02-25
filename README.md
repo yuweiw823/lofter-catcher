@@ -1,0 +1,34 @@
+# Lofter-Catcher
+A chrome extension for lofter blogging
+
+百度网盘下载：http://pan.baidu.com/s/1m5KSY
+
+
+chrome官方：https://chrome.google.com/webstore/detail/ilabeeklpmaacpjamehodpkgkjidnmpf
+
+
+1. 代码还不是很稳定，长文运行时间久，且经常有抓取不到的情况（由于lofter存档页异步加载）。如果抓取没有成功，刷新一下存档页，页面拖到底端，等所有标题都冒出来后再试试。
+
+
+2. 安装出现问题，请到chrome://extensions/ 勾选开发者模式，再重启浏览器。或者到chrome官方商店安装（需要翻墙）
+
+
+3. 请勿用于二次传播！请勿用于二次传播！请勿用于二次传播！重要的事说三遍！
+
+
+4. 代码会继续优化：
+
+
+  1）标注原文来源，二次传播提醒；
+
+
+  2）异步加载判断，归档页全部加载完成后才开始抓取；
+
+
+  3）状态提醒优化；
+
+
+  4）抓取元素判断还会细化，因为有基友反映有时会把lofter博主的个人介绍抓下来；
+
+
+  5）算法优化，目前这个抓长文还是太卡。

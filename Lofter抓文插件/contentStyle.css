@@ -1,0 +1,10 @@
+#output {
+	width: 200%;
+	height:300px;
+	margin:20px 0;
+}
+#hint, #finish {
+	font-size: 18px;
+	text-align: center;
+	color: #BA0808;
+}

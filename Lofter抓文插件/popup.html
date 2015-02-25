@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Lofter Catcher</title>
+    <style>
+      * {
+        margin: 0; padding: 0};
+      body {
+        font-family:'Hiragino Sans GB', 'Microsoft YaHei', 微软雅黑, tahoma, arial, simsun, 宋体;
+        font-size: 100%;
+      }
+      h3 {
+        line-height: 150%;
+        margin: auto;
+        display: block;
+      }
+      button {
+        width:80px;
+        height:30px;
+        background-color: #DFDFDF;
+        font-size: 100%;
+      }
+      .inputblank {
+        margin: 0 10px;
+        width: 210px;
+        height:26px;
+      }
+      #container {
+        white-space: pre;
+        margin: 0 30px;
+        width: 400px;
+      }
+    </style>
+    <script src="popup.js"></script>
+  </head>
+  
+  <body>
+    <div id="container">
+      <h3>请在作者归档页(http://xxxxx.lofter.com/view)使用该插件<br/>插件将在标题中搜索关键字，抓取博文并按时间顺序排列</h3>
+      <p>标题关键字<input type="input" id="title_keyword" class="inputblank" name="title_keyword" placeholder="标题关键字"><button id="catcher" >抓取</button></p>
+      
+      <div id="msg"></div>
+    </div>
+  </body>
+</html>
