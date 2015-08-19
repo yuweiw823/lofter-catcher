@@ -1,128 +1,80 @@
 //This is the content script
 //chrome.storage.local.get('keyword', function (input_keyword){
 window.onload = function () {
+	console.log('ready');
 	chrome.runtime.onMessage.addListener(
 		function (request, sender, sendResponse) {
-	      	console.log(sender.tab ?
-	            "from a content script:" + sender.tab.url :
-	            "from the extension");
+	      	console.log(sender.tab ? "from a content script:" + sender.tab.url : "from the extension");
 			if (request.greeting == "click") {
 				var startURL = document.URL;
-				if (startURL == undefined) {
-					sendResponse('notDownload');
+				if ((/http\:\/\/[a-z0-9\-]{5,}\.lofter\.com\/view/).test(startURL)) {
+					sendResponse('rightStartURL');
+					//取得关键字，调用抓取函数
+					chrome.storage.sync.get(function (data){
+						var keyword = data.keyword;
+						getAllLinks(keyword);
+					});
 				} else {
-					//是否是正确的lofter归档页地址
-					if ((/http\:\/\/[a-z0-9\-]{5,}\.lofter\.com\/view/).test(startURL)) {
-						sendResponse('rightStartURL');
-						console.log('rightStartURL');
-						//创建、清理输出文本框
-						if (!document.getElementById('output')) {
-							outputCreate();
-							finishCreate();
-							//var copyButton = getElementById('copyButton');
-							//var clearButton = getElementById('clearButton');
-						} else {
-							var output = document.getElementById('output');
-							output.innerHTML = '';
-						}
-						//取得关键字，调用抓取函数
-						chrome.storage.sync.get(function (data){
-							var keyword = data.keyword;
-							getAllLinks(keyword);
-						});
-
-					} else {
-						sendResponse('wrongStartURL');
-						console.log('wrongStartURL');
-					}
+					sendResponse('wrongStartURL');
 				}
+			} else {
+				sendResponse('error');
 			}
 		}
 	);
 }
 
 function getAllLinks(_keyword) {
-
-	var allArticleList = [];
 	var allArticleList = document.getElementsByClassName('g-bdc')[0].getElementsByTagName('h3');
-	var articleList = [];
+	var articleUrlList = [];
+	var articleTitleList = [];
+	var processItem = [];
+	var output = '';
 
 	for (var i=0; i<allArticleList.length; i++){
-		if((allArticleList[i].innerHTML).indexOf(_keyword) > -1){
-			articleList.push(allArticleList[i].parentNode.getAttribute('href'));
+		if(allArticleList[i].innerText.indexOf(_keyword) > -1){
+			articleUrlList.push(allArticleList[i].parentNode.getAttribute('href'));
+			articleTitleList.push(allArticleList[i].innerText);
 		}
 	};
 
-	var n = articleList.length;
-	title = new Array(n);
-	para = new Array(n);
-
-	getOutPut(articleList, title, para, n-1);
+	var n = articleUrlList.length;
+	var outputWindow = window.open('','targetWindow','scrollbars=0,resizable=1,width=800,height=600');
+	getOutPut(articleUrlList, articleTitleList, processItem, n-1, output, outputWindow);
 }
 
-function getOutPut(articleList, title, para, k) {
+function getOutPut(articleUrlList, articleTitleList, processItem, k, output, outputWindow) {
+	var warningText = "***************警******告*****************\n本文原载于 " + document.URL + ", \n版权归原作者所有。仅可用作私人收藏。\n请勿将本文用于二次传播或商业用途！\n*******************************************\n"
 	if(k >= 0){
-		var output = document.getElementById('output');
 		console.log(k);
 		var pageRequest = new XMLHttpRequest();
-		pageRequest.open("GET", articleList[k], true);  //同步(false)或异步(true)
+		pageRequest.open("GET", articleUrlList[k], true);  //同步(false)或异步(true)
 		pageRequest.responseType = "document";
 		pageRequest.onload = function (){
 			var viewPage = this.response;
-
-			var pageTitleh2 = viewPage.getElementsByTagName('h2');
-			var pageTitleh3 = viewPage.getElementsByTagName('h3');
-			var pageContent = viewPage.getElementsByTagName("p");
-			para[k] = pageContent[0];
-			for (var i = 0; i < pageTitleh2.length; i++) {
-				output.innerHTML += removeHTMLTag(pageTitleh2[i].innerHTML);
-			};
-			for (var i = 0; i < pageTitleh3.length; i++) {
-				output.innerHTML += removeHTMLTag(pageTitleh3[i].innerHTML);
-			};
+			var pageContent = viewPage.getElementsByTagName('p');
+			processItem[k] = pageContent[0];
+			output += warningText + '【' + articleTitleList[k] + '】\n';
 			for (var i = 0; i < pageContent.length; i++) {
-				output.innerHTML += removeHTMLTag(pageContent[i].innerHTML) + "\n";
+				output += pageContent[i].innerText;
 			};
-			console.log(para[k] + '已加载');
-			if (para[k] != undefined) {
-				getOutPut(articleList, title, para, --k);
+			if (processItem[k] != undefined) {
+				getOutPut(articleUrlList, articleTitleList, processItem, --k, output, outputWindow);
 			}
 		} 
 		pageRequest.send(null);
-	} 
+	}
+	var percent = calProcess (articleTitleList, k);
+	
+	outputWindow.document.title = '抓取结果';
+	outputWindow.document.body.innerHTML = (k<=0) ? 
+		('<h2 style="color:#BA0808;text-align:center;">抓取完成~\\(≧▽≦)/</h2><textarea style="height:90%; width:100%; font-family:\'Hiragino Sans GB\', \'Microsoft YaHei\', 微软雅黑, tahoma, arial, simsun, 宋体;" autofocus>'+output+'</textarea>') 
+		: '<h3 style="color:#BA0808; text-align:center; font-family:\'Hiragino Sans GB\', \'Microsoft YaHei\', 微软雅黑, tahoma, arial, simsun, 宋体;">努力抓取中……已完成 ' + percent + '%</h3>';
+	return output;
 }
 
-
-function removeHTMLTag(str) {
-    str = str.replace(/<\/?[^>]*>/g,'\n'); 		//去除HTML tag
-    str = str.replace(/[ | ]*\n/g,'\n'); 		//去除行尾空白
-    str = str.replace(/\n[\s| | ]*\r/g,'\n');	//去除多余空行
-    str = str.replace(/\n{2,}/g,'\n'); 			//去除多余空行
-    str = str.replace(/&nbsp;/ig,'');			//去掉&nbsp;
-    return str;
-}
-
-function outputCreate() {
-	var parentArea = document.getElementsByClassName('schbtn')[0];
-	var output = document.createElement('textarea');
-	output.setAttribute('id', 'output');
-	parentArea.appendChild(output);
-	//var clearButton = buttonCreat('重置', 'reset');
-	//var copyButton = buttonCreat('复制全部', 'selectAll');
-	//parentArea.appendChild(copyButton);
-	//parentArea.appendChild(clearButton);
-}
-function finishCreate() {
-	var parentArea = document.getElementsByClassName('schbtn')[0];
-	var finish = document.createElement('h1');
-	finish.setAttribute('id', 'finish');
-	parentArea.appendChild(finish);
-	finish.innerHTML = 'ctrl + A 全选文本, ctrl + C 复制文本';
-}
-
-function buttonCreat(text, id) {
-	var newButton = document.createElement('button');
-	newButton.setAttribute('id', id);
-	newButton.innerHTML = text;
-	return newButton;
+function calProcess (articleTitleList, k){
+	var totalArticle = articleTitleList.length;
+	var percent = ((totalArticle - k)/totalArticle).toFixed(2) * 100;
+	return percent;
 }

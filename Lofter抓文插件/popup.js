@@ -11,13 +11,11 @@ window.onload = function () {
         chrome.tabs.sendMessage(tabs[0].id, {greeting: "click"}, function (response){
           //chrome.storage.local.set({'keyword': keyword});
             if (response == 'rightStartURL') {
-              msg.innerHTML = '';
-            } else if (response == 'notDownload') {
-              msg.innerHTML = "<p>归档页还没加载完成，请稍后再试....</p>";
-            } else if (response == 'finish') {
-              msg.innerHTML = "<p>抓取完成！</p>";
+              msg.innerHTML = '<p>正确的归档页，抓取结果将出现在弹窗中</p>';
+            } else if (response == 'wrongStartURL') {
+              msg.innerHTML = "<p>当前页面非lofter博主的归档页，请在归档页使用插件</p>";
             } else {
-              msg.innerHTML = "<p>未能抓取成功，请刷新后再试一试。</br>可能原因：归档页未加载完成 / 当前页面非lofter博主的归档页）</p>";
+              msg.innerHTML = "<p>出错啦！刷新一下归档页再试一次！</p>";
             }
         });
       });

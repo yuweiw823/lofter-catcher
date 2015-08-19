@@ -29,9 +29,3 @@ chrome商店：https://chrome.google.com/webstore/detail/ilabeeklpmaacpjamehodpk
 
 
   3）状态提醒优化；
-
-
-  4）抓取元素判断还会细化，因为有基友反映有时会把lofter博主的个人介绍抓下来；
-
-
-  5）算法优化，目前这个抓长文还是太卡。
