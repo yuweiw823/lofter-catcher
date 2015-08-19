@@ -9,10 +9,13 @@ window.onload = function () {
 				var startURL = document.URL;
 				if ((/http\:\/\/[a-z0-9\-]{5,}\.lofter\.com\/view/).test(startURL)) {
 					sendResponse('rightStartURL');
-					//取得关键字，调用抓取函数
 					chrome.storage.sync.get(function (data){
 						var keyword = data.keyword;
-						getAllLinks(keyword);
+						if(keyword.length == 0 || keyword =='') {
+							alert('请输入关键词');
+						} else {
+							getAllLinks(keyword);
+						}
 					});
 				} else {
 					sendResponse('wrongStartURL');
@@ -31,12 +34,15 @@ function getAllLinks(_keyword) {
 	var processItem = [];
 	var output = '';
 
+
 	for (var i=0; i<allArticleList.length; i++){
 		if(allArticleList[i].innerText.indexOf(_keyword) > -1){
 			articleUrlList.push(allArticleList[i].parentNode.getAttribute('href'));
 			articleTitleList.push(allArticleList[i].innerText);
 		}
 	};
+
+	console.log(allArticleList);
 
 	var n = articleUrlList.length;
 	var outputWindow = window.open('','targetWindow','scrollbars=0,resizable=1,width=800,height=600');
@@ -45,6 +51,7 @@ function getAllLinks(_keyword) {
 
 function getOutPut(articleUrlList, articleTitleList, processItem, k, output, outputWindow) {
 	var warningText = "***************警******告*****************\n本文原载于 " + document.URL + ", \n版权归原作者所有。仅可用作私人收藏。\n请勿将本文用于二次传播或商业用途！\n*******************************************\n"
+	var len = articleTitleList.length;
 	if(k >= 0){
 		console.log(k);
 		var pageRequest = new XMLHttpRequest();
@@ -64,17 +71,12 @@ function getOutPut(articleUrlList, articleTitleList, processItem, k, output, out
 		} 
 		pageRequest.send(null);
 	}
-	var percent = calProcess (articleTitleList, k);
 	
 	outputWindow.document.title = '抓取结果';
 	outputWindow.document.body.innerHTML = (k<=0) ? 
-		('<h2 style="color:#BA0808;text-align:center;">抓取完成~\\(≧▽≦)/</h2><textarea style="height:90%; width:100%; font-family:\'Hiragino Sans GB\', \'Microsoft YaHei\', 微软雅黑, tahoma, arial, simsun, 宋体;" autofocus>'+output+'</textarea>') 
-		: '<h3 style="color:#BA0808; text-align:center; font-family:\'Hiragino Sans GB\', \'Microsoft YaHei\', 微软雅黑, tahoma, arial, simsun, 宋体;">努力抓取中……已完成 ' + percent + '%</h3>';
+		('<h3 style='+redStyle+'>抓取完成~\\(≧▽≦)/~</h3><textarea style="width:100%; height:95%">'+output+'</textarea>') 
+		: '<h3 style='+redStyle+'>努力抓取中……正在抓取第 ' + (len-k) + ' 篇，共 ' + len + ' 篇</h3>';
 	return output;
 }
 
-function calProcess (articleTitleList, k){
-	var totalArticle = articleTitleList.length;
-	var percent = ((totalArticle - k)/totalArticle).toFixed(2) * 100;
-	return percent;
-}
+var redStyle = "\"margin:5px; color:#BA0808; text-align:center; font-family:\'Hiragino Sans GB\', \'Microsoft YaHei\', 微软雅黑, tahoma, arial, simsun, 宋体;\"";
