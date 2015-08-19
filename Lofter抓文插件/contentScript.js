@@ -1,6 +1,18 @@
 //This is the content script
 //chrome.storage.local.get('keyword', function (input_keyword){
+// http://verdancy.lofter.com/view
+// document.getElementsByClassName('g-bdc')[0].childNodes[5].lastChild.offsetTop
+// http://jsfiddle.net/3xTM2/
+
+
 window.onload = function () {
+	// window.scrollTo(0, 100000);
+	var currentY = document.getElementsByClassName('g-bdc').scrollTop();
+
+	setInterval(function(){
+		// window.scrollTo(0, currentY+500);
+		console.log(currentY);
+	}, 3000);
 	console.log('ready');
 	chrome.runtime.onMessage.addListener(
 		function (request, sender, sendResponse) {
@@ -12,10 +24,9 @@ window.onload = function () {
 					chrome.storage.sync.get(function (data){
 						var keyword = data.keyword;
 						if(keyword.length == 0 || keyword =='') {
-							alert('请输入关键词');
-						} else {
-							getAllLinks(keyword);
+							alert('关键词为空，将抓取归档页所有博文');
 						}
+						getAllLinks(keyword);
 					});
 				} else {
 					sendResponse('wrongStartURL');
@@ -42,8 +53,6 @@ function getAllLinks(_keyword) {
 		}
 	};
 
-	console.log(allArticleList);
-
 	var n = articleUrlList.length;
 	var outputWindow = window.open('','targetWindow','scrollbars=0,resizable=1,width=800,height=600');
 	getOutPut(articleUrlList, articleTitleList, processItem, n-1, output, outputWindow);
@@ -63,7 +72,7 @@ function getOutPut(articleUrlList, articleTitleList, processItem, k, output, out
 			processItem[k] = pageContent[0];
 			output += warningText + '【' + articleTitleList[k] + '】\n';
 			for (var i = 0; i < pageContent.length; i++) {
-				output += pageContent[i].innerText;
+				output += pageContent[i].innerText + '\n';
 			};
 			if (processItem[k] != undefined) {
 				getOutPut(articleUrlList, articleTitleList, processItem, --k, output, outputWindow);
@@ -74,7 +83,7 @@ function getOutPut(articleUrlList, articleTitleList, processItem, k, output, out
 	
 	outputWindow.document.title = '抓取结果';
 	outputWindow.document.body.innerHTML = (k<=0) ? 
-		('<h3 style='+redStyle+'>抓取完成~\\(≧▽≦)/~</h3><textarea style="width:100%; height:95%">'+output+'</textarea>') 
+		('<h3 style='+redStyle+'>抓取完成，【ctrl + A】可全选文本 ~\\(≧▽≦)/~</h3><textarea style="width:100%; height:95%">'+output+'</textarea>') 
 		: '<h3 style='+redStyle+'>努力抓取中……正在抓取第 ' + (len-k) + ' 篇，共 ' + len + ' 篇</h3>';
 	return output;
 }

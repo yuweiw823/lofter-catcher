@@ -10,11 +10,11 @@ window.onload = function () {
             chrome.tabs.sendMessage(tabs[0].id, {greeting: "click"}, function (response){
                 //chrome.storage.local.set({'keyword': keyword});
                 if (response == 'rightStartURL') {
-                    msg.innerHTML = '<p>已位于正确的归档页，抓取结果将出现在弹窗中</p>';
+                    msg.innerHTML = '<p>开始抓取，抓取结果将出现在弹窗中</p>';
                 } else if (response == 'wrongStartURL') {
-                    msg.innerHTML = "<p>当前页面非lofter博主的归档页，请在归档页使用插件</p>";
+                    msg.innerHTML = "<p>当前页面非lofter博主的归档页，请在归档页使用本插件</p>";
                 } else {
-                    msg.innerHTML = "<p>出错啦！请耐心等待归档页全部加载完成~</br>如果还是不行，请刷新归档页再试一次~</p>";
+                    msg.innerHTML = "<p>不要心急~ 归档页还在加载中~</br>若多次抓取仍未成功，请刷新归档页再试一次~</p>";
                 }
 
             });
