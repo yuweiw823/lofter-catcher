@@ -8,7 +8,7 @@ window.onload = function () {
     
     chrome.tabs.query({active: true, currentWindow: true}, function (tabs){
       var port = chrome.tabs.connect(tabs[0].id, {name: "lofterCatcher"});
-      port.postMessage({greeting: "click"});
+      port.postMessage("click"});
       port.onMessage.addListener(function (msg) {
 
         if(msg == 'rightStartURL') {

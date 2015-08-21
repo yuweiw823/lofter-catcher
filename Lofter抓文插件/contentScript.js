@@ -24,9 +24,9 @@ window.onload = function () {
 
 // request, sender, sendResponse
 	chrome.runtime.onConnect.addListener (function (port) {
-		console.assert(port.name == "lofterCatcher");
+		console.log(port.name == "lofterCatcher");
 		port.onMessage.addListener(function (msg) {
-			if (msg.greeting == "click") {
+			if (msg == "click") {
 				console.log("click");
 				var startURL = document.URL;
 				if ((/http\:\/\/[a-z0-9\-]{5,}\.lofter\.com\/view/).test(startURL)) {
@@ -37,7 +37,7 @@ window.onload = function () {
 						window.scrollBy(0, 1000);
 						var loadedItemLength = document.getElementsByClassName('g-bdc')[0].querySelectorAll(".text, .img, .music, .movie").length;
 						// console.log(document.getElementsByClassName('g-bdc')[0].childNodes[5].lastChild.offsetTop);
-						if(loadedItemLength % 50 != 0){
+						if(loadedItemLength = totalItemLength){
 							clearInterval(timer);
 							port.postMessage('pageLoaded');
 
