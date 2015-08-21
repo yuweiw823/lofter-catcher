@@ -1,89 +1,43 @@
 window.onload = function () {
   var catcherButton = document.getElementById('catcher');
-  // catcherButton.disabled = true;
-  var msg = document.getElementById('msg');
-
-
-// chrome.runtime.onMessage.addListener(
-//   function(request, sender, sendResponse) {
-//   console.log(sender.tab ?
-//         "from a content script:" + sender.tab.url :
-//         "from the extension");
-//   if (request.greeting == "hello")
-//     sendResponse({farewell: "goodbye"});
-//   });
-
-
-  // chrome.runtime.onMessage.addListener(
-  //   function(request, sender, sendResponse) {
-  //     // console.log(sender.tab ? "from a content script:" + sender.tab.url : "from the extension");
-  //     if (request.greeting == "ready"){
-  //     //button clickable
-  //       catcherButton.disabled = false;
-  //       sendResponse({buttonStatus: "clicked"});
-
-  //     // catcherButton.onclick = function (){
-  //     //   var keyWord = document.getElementById('title_keyword').value;
-  //     //   sendResponse({buttonStatus: "clicked"});
-  //     // }
-
-
-
-
-
-  //       // var keyWord = document.getElementById('title_keyword').value;
-  //       // chrome.storage.sync.set({'keyword': keyWord});
-
-  //       // chrome.tabs.query({active: true, currentWindow: true}, function (tabs){
-  //       //   chrome.tabs.sendMessage(tabs[0].id, {greeting: "click"}, function (response){
-  //       //     //chrome.storage.local.set({'keyword': keyword});
-  //       //     if (response == 'rightStartURL') {
-  //       //       msg.innerHTML += '<p>开始抓取，抓取结果将出现在弹窗中</p>';
-  //       //       catcherButton.disabled = true;
-  //       //     } else if (response == 'wrongStartURL') {
-  //       //       msg.innerHTML += "<p>当前页面非lofter博主的归档页，请在归档页使用本插件</p>";
-  //       //     } else {
-  //       //       msg.innerHTML += "<p>不要心急~ 归档页还在加载中~</br>若多次抓取仍未成功，请刷新归档页再试一次~</p>";
-  //       //     }
-
-  //       //   });
-  //       // });
-  //     }
-
-
-
-
-  //     // sendResponse({farewell: "goodbye"});
-  //   }
-  // );
-    
+  var msgDiv = document.getElementById('msg');
   catcherButton.onclick = function (){
+    msgDiv.innerHTML = '<p>click</p>';
     var keyWord = document.getElementById('title_keyword').value;
     chrome.storage.sync.set({'keyword': keyWord});
-
+    
     chrome.tabs.query({active: true, currentWindow: true}, function (tabs){
-      chrome.tabs.sendMessage(tabs[0].id, {greeting: "click"}, function (response){
-        if (response == 'rightStartURL') {
-          msg.innerHTML += '<p>正确的归档页，准备抓取</p>';
-          catcherButton.disabled = true;
-        } else if(response == 'pageLoading'){
-          msg.innerHTML += '<p>加载归档页中...</p>';
-        } else if(response == 'pageLoaded'){
-          msg.innerHTML += '<p>归档页加载完毕，准备抓取...</p>';
-        } else if(response == 'catching'){
-          msg.innerHTML += '<p>抓取中...</p>';
-        } else if (response == 'wrongStartURL') {
-          msg.innerHTML += "<p>当前页面非lofter博主的归档页，请在归档页使用本插件</p>";
-        } else {
-          msg.innerHTML += "<p>不要心急~ 归档页还在加载中~</br>若多次抓取仍未成功，请刷新归档页再试一次~</p>";
-        }
+      var port = chrome.tabs.connect(tabs[0].id, {name: "lofterCatcher"});
+      port.postMessage({greeting: "click"});
+      port.onMessage.addListener(function (msg) {
 
-      });
-    });
-  }
+        if(msg == 'rightStartURL') {
+          msgDiv.innerHTML += '<p>正确的归档页，准备抓取</p>';
+          catcherButton.disabled = true;
+        } else if (msg == 'pageLoading') {
+          msgDiv.innerHTML += '<p>加载归档页中...</p>';
+        } else if (msg == 'pageLoaded') {
+          msgDiv.innerHTML += '<p>归档页加载完毕，准备抓取...</p>';
+        } else if (msg == 'catching') {
+          msgDiv.innerHTML += '<p>抓取中...</p>';
+        } else if (msg == 'wrongStartURL') {
+          msgDiv.innerHTML += "<p>当前页面非lofter博主的归档页，请在归档页使用本插件</p>";
+        } else {
+          msgDiv.innerHTML += "<p>不要心急~ 归档页还在加载中~</br>若多次抓取仍未成功，请刷新归档页再试一次~</p>";
+        }
+      }
+    }
+  };
 };
 
 
-
+// var port = chrome.runtime.connect({name: "knockknock"});
+// port.postMessage({joke: "Knock knock"});
+// port.onMessage.addListener(function(msg) {
+//   if (msg.question == "Who's there?")
+//     port.postMessage({answer: "Madame"});
+//   else if (msg.question == "Madame who?")
+//     port.postMessage({answer: "Madame... Bovary"});
+// });
 
 

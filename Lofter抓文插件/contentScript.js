@@ -10,40 +10,55 @@ var totalItemLength = parseInt(document.querySelector('.m-txtsch > .txt > .currt
 window.onload = function () {
 	console.log('ready');
 
-	chrome.runtime.onMessage.addListener(
-		function (request, sender, sendResponse) {
-			if (request.greeting == "click") {
+// chrome.runtime.onConnect.addListener(function(port) {
+//   console.assert(port.name == "knockknock");
+//   port.onMessage.addListener(function(msg) {
+//     if (msg.joke == "Knock knock")
+//       port.postMessage({question: "Who's there?"});
+//     else if (msg.answer == "Madame")
+//       port.postMessage({question: "Madame who?"});
+//     else if (msg.answer == "Madame... Bovary")
+//       port.postMessage({question: "I don't get it."});
+//   });
+// });
+
+// request, sender, sendResponse
+	chrome.runtime.onConnect.addListener (function (port) {
+		console.assert(port.name == "lofterCatcher");
+		port.onMessage.addListener(function (msg) {
+			if (msg.greeting == "click") {
+				console.log("click");
 				var startURL = document.URL;
 				if ((/http\:\/\/[a-z0-9\-]{5,}\.lofter\.com\/view/).test(startURL)) {
-					sendResponse('rightStartURL');
-					timeCount = 0;
+					port.postMessage('rightStartURL');
+
 					var timer = setInterval(function(){
-						sendResponse('pageLoading');
+						port.postMessage('pageLoading');
 						window.scrollBy(0, 1000);
 						var loadedItemLength = document.getElementsByClassName('g-bdc')[0].querySelectorAll(".text, .img, .music, .movie").length;
 						// console.log(document.getElementsByClassName('g-bdc')[0].childNodes[5].lastChild.offsetTop);
 						if(loadedItemLength % 50 != 0){
 							clearInterval(timer);
-							sendResponse('pageLoaded');
+							port.postMessage('pageLoaded');
+
 							chrome.storage.sync.get(function (data){
 								var keyword = data.keyword;
-								if(keyword.length == 0 || keyword =='') {
-									alert('关键词为空，将抓取归档页所有博文');
-								}
-								sendResponse('catching');
+								if(keyword.length == 0 || keyword =='') {alert('关键词为空，将抓取归档页所有博文')};
+								port.postMessage('catching');
 								getAllLinks(keyword);
 							});
+
 						}
+
 					}, 500);
 				} else {
-					sendResponse('wrongStartURL');
+					port.postMessage('wrongStartURL');
 				}
-
 			} else {
-				sendResponse('error');
+				port.postMessage('error');
 			}
-		}
-	);
+		});
+	});
 }
 
 function getAllLinks(_keyword) {
