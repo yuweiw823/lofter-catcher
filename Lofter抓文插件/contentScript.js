@@ -1,55 +1,32 @@
 //This is the content script
-//chrome.storage.local.get('keyword', function (input_keyword){
 // http://verdancy.lofter.com/view
-// document.getElementsByClassName('g-bdc')[0].childNodes[5].lastChild.offsetTop
-// http://jsfiddle.net/3xTM2/
-// http://stackoverflow.com/questions/6969403/cant-get-execcommandpaste-to-work-in-chrome
 
 var totalItemLength = parseInt(document.querySelector('.m-txtsch > .txt > .currt > span').innerText);
 
 window.onload = function () {
 	console.log('ready');
-
-// chrome.runtime.onConnect.addListener(function(port) {
-//   console.assert(port.name == "knockknock");
-//   port.onMessage.addListener(function(msg) {
-//     if (msg.joke == "Knock knock")
-//       port.postMessage({question: "Who's there?"});
-//     else if (msg.answer == "Madame")
-//       port.postMessage({question: "Madame who?"});
-//     else if (msg.answer == "Madame... Bovary")
-//       port.postMessage({question: "I don't get it."});
-//   });
-// });
-
-// request, sender, sendResponse
 	chrome.runtime.onConnect.addListener (function (port) {
 		console.log(port.name == "lofterCatcher");
 		port.onMessage.addListener(function (msg) {
 			if (msg == "click") {
-				console.log("click");
+
 				var startURL = document.URL;
 				if ((/http\:\/\/[a-z0-9\-]{5,}\.lofter\.com\/view/).test(startURL)) {
 					port.postMessage('rightStartURL');
-
 					var timer = setInterval(function(){
 						port.postMessage('pageLoading');
 						window.scrollBy(0, 1000);
 						var loadedItemLength = document.getElementsByClassName('g-bdc')[0].querySelectorAll(".text, .img, .music, .movie").length;
-						// console.log(document.getElementsByClassName('g-bdc')[0].childNodes[5].lastChild.offsetTop);
-						if(loadedItemLength = totalItemLength){
+						if(loadedItemLength == totalItemLength){
 							clearInterval(timer);
 							port.postMessage('pageLoaded');
 
 							chrome.storage.sync.get(function (data){
 								var keyword = data.keyword;
-								if(keyword.length == 0 || keyword =='') {alert('关键词为空，将抓取归档页所有博文')};
 								port.postMessage('catching');
 								getAllLinks(keyword);
 							});
-
 						}
-
 					}, 500);
 				} else {
 					port.postMessage('wrongStartURL');
@@ -107,7 +84,7 @@ function getOutPut(articleUrlList, articleTitleList, processItem, k, output, out
 	
 	outputWindow.document.title = '抓取结果';
 	outputWindow.document.body.innerHTML = (k<=0) ? 
-		('<h3 id="outputMessage" style='+redStyle+'>抓取完成</h3><button id="copybtn" style=' + buttonStyle + '>复制文本</button><textarea id="copyarea" style="width:100%; height:90%">'+ output + '</textarea>') 
+		('<h3 id="outputMessage" style='+redStyle+'>抓取完毕</h3><button id="copybtn" style=' + buttonStyle + '>复制文本</button><textarea id="copyarea" style="width:100%; height:88%">'+ output + '</textarea>') 
 		: '<h3 style='+redStyle+'>努力抓取中…… 正在抓取第 ' + (len-k) + ' 篇，共 ' + len + ' 篇</h3>';
 	if(k<=0){
 		copyOutput(outputWindow);
@@ -117,7 +94,7 @@ function getOutPut(articleUrlList, articleTitleList, processItem, k, output, out
 
 // var authorInfo = "\n\n*******Lofter 抓文插件 Powered by http://afanvera.lofter.com*******";
 var redStyle = "\"margin:5px; color:#BA0808; text-align:center; font-family:\'Hiragino Sans GB\', \'Microsoft YaHei\', 微软雅黑, tahoma, arial, simsun, 宋体;\"";
-var buttonStyle = "\"width:20%; height:26px; margin:auto 40%; padding-bottom: 4px; background-color: #DFDFDF; font-family:\'Hiragino Sans GB\', \'Microsoft YaHei\', 微软雅黑, tahoma, arial, simsun, 宋体;\""
+var buttonStyle = "\"width:20%; height:26px; margin:2px 40% 6px; padding-bottom: 4px; background-color: #DFDFDF; font-family:\'Hiragino Sans GB\', \'Microsoft YaHei\', 微软雅黑, tahoma, arial, simsun, 宋体;\""
 function copyOutput(outputWindow){
 	var outputMessage = outputWindow.document.getElementById('outputMessage');
 	var copyTextareaBtn = outputWindow.document.getElementById('copybtn');
@@ -129,7 +106,6 @@ function copyOutput(outputWindow){
 			var successful = outputWindow.document.execCommand('copy');
 			outputMessage.innerHTML = successful ? '成功复制到剪贴板！' : '未能复制成功，可点击按钮【全选文本】，右键手动复制。';
 			copyTextareaBtn.innerText = successful ? '复制文本' : '全选文本';
-			// var msg = successful ? alert('成功复制到剪贴板！') : alert('未能成功复制到剪贴板，请手动复制。');
 		} catch (err) {
 			outputMessage.innerHTML = '未能复制成功，可点击按钮【全选文本】，右键手动复制。';
 			copyTextareaBtn.innerText = '全选文本';
