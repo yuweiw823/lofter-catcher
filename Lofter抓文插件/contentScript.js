@@ -5,55 +5,40 @@
 // http://jsfiddle.net/3xTM2/
 // http://stackoverflow.com/questions/6969403/cant-get-execcommandpaste-to-work-in-chrome
 
+var totalItemLength = parseInt(document.querySelector('.m-txtsch > .txt > .currt > span').innerText);
 
 window.onload = function () {
-
-	// var timer = setInterval(function(){
-	// 	// window.scrollTo(0, currentY+500);
-	// 	window.scrollBy(0, 300);
-	// 	console.log(document.getElementsByClassName('g-bdc')[0].childNodes[5].lastChild.offsetTop);
-	// }, 300);
-
-// chrome.runtime.sendMessage({greeting: "hello"}, function(response) {
-//   console.log(response.farewell);
-// });
-
-	// chrome.runtime.sendMessage({greeting: "ready"}, function(response) {
-	//   	console.log(response.buttonStatus);
-	//   	if(response.buttonStatus == "clicked"){
-	//   		//确认点击，开始滚动
-	//   		// console.log(response.buttonStatus);
-	// 		var timer = setInterval(function(){
-	// 			// window.scrollTo(0, currentY+500);
-	// 			window.scrollBy(0, 300);
-	// 			console.log(document.getElementsByClassName('g-bdc')[0].childNodes[5].lastChild.offsetTop);
-	// 		}, 300);
-	// 		// var keyWord = response.InputKeyword;
-	// 		// console.log(response.keyWord);
-	//   	}
-	// });
-
-
 	console.log('ready');
+
 	chrome.runtime.onMessage.addListener(
 		function (request, sender, sendResponse) {
-	      	console.log(sender.tab ? "from a content script:" + sender.tab.url : "from the extension");
 			if (request.greeting == "click") {
-
-
 				var startURL = document.URL;
 				if ((/http\:\/\/[a-z0-9\-]{5,}\.lofter\.com\/view/).test(startURL)) {
 					sendResponse('rightStartURL');
-					chrome.storage.sync.get(function (data){
-						var keyword = data.keyword;
-						if(keyword.length == 0 || keyword =='') {
-							alert('关键词为空，将抓取归档页所有博文');
+					timeCount = 0;
+					var timer = setInterval(function(){
+						sendResponse('pageLoading');
+						window.scrollBy(0, 1000);
+						var loadedItemLength = document.getElementsByClassName('g-bdc')[0].querySelectorAll(".text, .img, .music, .movie").length;
+						// console.log(document.getElementsByClassName('g-bdc')[0].childNodes[5].lastChild.offsetTop);
+						if(loadedItemLength % 50 != 0){
+							clearInterval(timer);
+							sendResponse('pageLoaded');
+							chrome.storage.sync.get(function (data){
+								var keyword = data.keyword;
+								if(keyword.length == 0 || keyword =='') {
+									alert('关键词为空，将抓取归档页所有博文');
+								}
+								sendResponse('catching');
+								getAllLinks(keyword);
+							});
 						}
-						getAllLinks(keyword);
-					});
+					}, 500);
 				} else {
 					sendResponse('wrongStartURL');
 				}
+
 			} else {
 				sendResponse('error');
 			}
