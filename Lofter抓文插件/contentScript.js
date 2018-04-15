@@ -83,8 +83,8 @@ function getAllLinks(_keyword) {
 }
 
 function getOutPut(articleUrlList, articleTitleList, processItem, k, output, outputWindow) {
-	var warningText1 = "******************警********告********************\n本文原载于 "
-	var warningText2 = "，\n版权归原作者所有，请勿用于二次传播及任何商业用途！\n*************************************************\n\n";
+	var warningText1 = "********************警********告********************\n以下文字原载于 "
+	var warningText2 = "，\n版权归原作者所有，请勿用于二次传播及任何商业用途！\n***************************************************\n\n";
 	var authorUrl = document.URL.split("/view")[0];
 
 	var len = articleTitleList.length;
@@ -114,7 +114,7 @@ function getOutPut(articleUrlList, articleTitleList, processItem, k, output, out
 		: '<h3 style='+redStyle+'>努力抓取中…… 正在抓取第 ' + (len-k) + ' 篇，共 ' + len + ' 篇</h3>';
 	if(k<0){
 		if (output == ''){
-			outputWindow.document.body.innerHTML = '<h3 id="outputMessage" style='+redStyle+'>抓取失败，未找到相应结果</h3>'
+			outputWindow.document.body.innerHTML = '<h3 id="outputMessage" style='+redStyle+'>未搜寻到关键词，抓取失败</h3>'
 		}
 		copyOutput(outputWindow);
 	};
@@ -132,7 +132,7 @@ function copyOutput(outputWindow){
 		copyTextarea.select();
 		try {
 			var successful = outputWindow.document.execCommand('copy');
-			outputMessage.innerHTML = successful ? '复制成功！' : '复制失败。可点击按钮【全选文本】，右键手动复制。';
+			outputMessage.innerHTML = successful ? '复制成功' : '复制失败。可点击按钮【全选文本】，右键手动复制。';
 			copyTextareaBtn.innerText = successful ? '复制文本' : '全选文本';
 		} catch (err) {
 			outputMessage.innerHTML = '未能复制成功，可点击按钮【全选文本】，右键手动复制。';
