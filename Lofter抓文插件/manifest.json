@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "Lofter抓文插件",
     "description": "This extension gets serial lofter articles from a certain user",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "icons": {
         "48": "icon48.png"
     },

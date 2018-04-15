@@ -8,31 +8,57 @@ window.onload = function () {
 	chrome.runtime.onConnect.addListener (function (port) {
 		console.log(port.name == "lofterCatcher");
 		port.onMessage.addListener(function (msg) {
-			if ((/http\:\/\/[a-z0-9\-]{5,}\.lofter\.com\/view/).test(startURL) == false) {
-				port.postMessage('wrongStartURL');
-			} else {
-				try {
+
+			function startCatch() {
+				chrome.storage.sync.get(function (data){
+					var keyword = data.keyword;
+					port.postMessage('catching');
+					getAllLinks(keyword);
+					port.postMessage('done');
+				});
+			}
+
+			try {
+				if ((/http\:\/\/[a-z0-9\-]{5,}\.lofter\.com\/view/).test(startURL) == false) {
+					port.postMessage('wrongStartURL');
+				} else {
 					port.postMessage('rightStartURL');
-					if (msg == "click") {
-						var timer = setInterval(function(){
-							port.postMessage('pageLoading');
+					var timer = null;
+					if (msg == "start") {
+						var prevPageYOffset;
+						var currPageYOffset;
+						var stopCount = 0;
+						timer = setInterval(function(){
 							window.scrollBy(0, 1000);
-							var loadedItemLength = document.getElementsByClassName('g-bdc')[0].querySelectorAll(".text, .img, .music, .movie").length;
-							if(loadedItemLength == totalItemLength){
-								clearInterval(timer);
-								port.postMessage('pageLoaded');
-								chrome.storage.sync.get(function (data){
-									var keyword = data.keyword;
-									port.postMessage('catching');
-									getAllLinks(keyword);
-								});
+							currPageYOffset = window.pageYOffset;
+
+							if((currPageYOffset + "") == (prevPageYOffset + "")) {
+								prevPageYOffset = currPageYOffset;
+								stopCount ++; 						
+								var loadedItemLength = document.getElementsByClassName('g-bdc')[0].querySelectorAll(".text, .img, .music, .movie").length;
+								if(loadedItemLength == totalItemLength){
+									clearInterval(timer);
+									port.postMessage('pageLoaded');
+									startCatch();
+								} else if (stopCount > 10) {
+									clearInterval(timer);
+									port.postMessage('pageScrollCannotLoadMore');
+								}
+							} else {
+								prevPageYOffset = currPageYOffset;
+								port.postMessage('pageScrollContinue');
 							}
 						}, 500);
 					}
-				} catch (err) {
-					port.postMessage('error');
-				}					
-			}
+				}
+
+				if (msg == "confirmCatching") {
+					startCatch();
+				}
+
+			} catch (err) {
+				port.postMessage('error');
+			}					
 		});
 	});
 }
@@ -57,7 +83,9 @@ function getAllLinks(_keyword) {
 }
 
 function getOutPut(articleUrlList, articleTitleList, processItem, k, output, outputWindow) {
-	var warningText = "******************警********告********************\n本文原载于 " + document.URL + "，\n版权归原作者所有，请勿用于二次传播及任何商业用途！\n*************************************************\n\n";
+	var warningText1 = "******************警********告********************\n本文原载于 "
+	var warningText2 = "，\n版权归原作者所有，请勿用于二次传播及任何商业用途！\n*************************************************\n\n";
+	var authorUrl = document.URL.split("/view")[0];
 
 	var len = articleTitleList.length;
 	if(k >= 0){
@@ -69,7 +97,7 @@ function getOutPut(articleUrlList, articleTitleList, processItem, k, output, out
 			var viewPage = this.response;
 			var pageContent = viewPage.getElementsByTagName('p');
 			processItem[k] = pageContent[0];
-			output += warningText + '【' + articleTitleList[k] + '】\n\n';
+			output += warningText1 + authorUrl + articleUrlList[k] + warningText2 + '【' + articleTitleList[k] + '】\n\n';
 			for (var i = 0; i < pageContent.length; i++) {
 				output += pageContent[i].innerText + '\n';
 			};
@@ -82,7 +110,7 @@ function getOutPut(articleUrlList, articleTitleList, processItem, k, output, out
 	
 	outputWindow.document.title = '抓取结果';
 	outputWindow.document.body.innerHTML = (k<=0) ? 
-		('<h3 id="outputMessage" style='+redStyle+'>抓取完毕</h3><button id="copybtn" style=' + buttonStyle + '>复制文本</button><textarea id="copyarea" style="width:100%; height:85%">'+ output + '</textarea>') 
+		('<div style="display:flex; flex-direction: column;"><h3 id="outputMessage" style='+redStyle+'>抓取完毕</h3><button id="copybtn" style=' + buttonStyle + '>复制文本</button></div><textarea id="copyarea" style="width:100%; height:85%">'+ output + '</textarea>') 
 		: '<h3 style='+redStyle+'>努力抓取中…… 正在抓取第 ' + (len-k) + ' 篇，共 ' + len + ' 篇</h3>';
 	if(k<0){
 		if (output == ''){
@@ -93,8 +121,8 @@ function getOutPut(articleUrlList, articleTitleList, processItem, k, output, out
 	return output;
 }
 
-var redStyle = "\"margin:5px; color:#BA0808; text-align:center; font-family:\'Hiragino Sans GB\', \'Microsoft YaHei\', 微软雅黑, tahoma, arial, simsun, 宋体;\"";
-var buttonStyle = "\"width:20%; height:26px; margin:2px 40% 8px; padding-bottom: 4px; background-color: #DFDFDF; font-family:\'Hiragino Sans GB\', \'Microsoft YaHei\', 微软雅黑, tahoma, arial, simsun, 宋体;\""
+var redStyle = "\"flex: auto; margin:2px auto; color: #d9534f; text-align: center; font-family:\'Hiragino Sans GB\', \'Microsoft YaHei\', 微软雅黑, tahoma, arial, simsun, 宋体;\"";
+var buttonStyle = "\"flex: auto; margin: auto; color: #fff; width: 80px; padding: 7px 12px; font-size: 14px; font-weight: 400; line-height: 1.42857143; text-align: center; white-space: nowrap; vertical-align: middle; -ms-touch-action: manipulation; touch-action: manipulation; cursor: pointer; border: 1px solid transparent; border-radius: 4px; background-color: #f0ad4e; border-color: #eea236; \"";
 
 function copyOutput(outputWindow){
 	var outputMessage = outputWindow.document.getElementById('outputMessage');
@@ -112,4 +140,3 @@ function copyOutput(outputWindow){
 		}
 	});
 }
-
