@@ -1,0 +1,45 @@
+挺多基友抱怨Lofter看文找文挺麻烦，于是周末闷在家里写了一个lofter抓文的chrome插件。可以在作者归档页的标题列表中搜索关键字，然后按时间顺序，自动整理成txt。
+
+说明：
+1，是demo版，所以不太稳定；
+2，目前仅支持chrome；
+3，有时候会显示无法抓取，请刷新一下归档页，等加载完全后再抓取；（Lofter的归档页时异步加载，所以网页没有加载完全时抓容易出问题）；
+4，有些粗体、斜体和下划线的字段分段可能会有些问题……
+
+
+使用方法：
+1，下载插件，打开chrome浏览器，把插件拖进去，安装。
+2，打开想抓取的作者lofter的归档页，点击浏览器右上角的插件图标。
+3，点抓取，如果没成功的话，刷新一下归档页再试一下。
+
+<a href="http://pan.baidu.com/s/1m5KSY" target="_blank">下载地址</a>
+
+
+最后：如果有bug的话GN们能在这贴下面回一下吗？我记下，可以继续完善。
+
+鞠躬谢。
+
+
+---------
+2.0.0 8/21/2015
+Lofter 抓文插件2.0.0 发布 & 说明
+
+【功能】
+在Lofter博主归档页的标题列表中搜索关键字，抓取正文，按时间顺序自动整理成纯文本。
+注意：仅适用于Chrome浏览器
+
+【2.0.0改进】
+改进算法，速度更快
+增加状态提示，随时掌握程序运行进度
+自动拖拽加载较长的归档页，抓文不再有缺漏
+ 增加全选复制按钮
+添加二次传播禁止提醒与版权声明
+
+【安装方法】
+    墙外
+Google Web Store 官方安装链接，点击“Add to Chrome”即可https://chrome.google.com/webstore/detail/lofter%E6%8A%93%E6%96%87%E6%8F%92%E4%BB%B6/ilabeeklpmaacpjamehodpkgkjidnmpf
+    墙内
+微盘下载链接http://vdisk.weibo.com/s/DmDbal3hUNJY/1440145508
+
+
+#Lofter抓文插件# 之前的lofter抓文插件升级啦~ 重新优化了算法、状态提示，增加了自动复制按钮。安装方法：下载文件http://vdisk.weibo.com/s/DmDbal3hUNJY/1440145508，拖入chrome://extensions 页即可(记得勾选‘开发者模式’)；墙外安装可直接点击https://chrome.google.com/webstore/detail/lofter%E6%8A%93%E6%96%87%E6%8F%92%E4%BB%B6/ilabeeklpmaacpjamehodpkgkjidnmpf 使用说明参考长微博~有疑问或bug尽管留言~大家看文愉快~ 
